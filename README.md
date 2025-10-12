@@ -1,117 +1,139 @@
-Fields:
+# Book Tracker CLI Design Document
+
+## Data Fields
+
+| SN | Title | Author | Format | P.date | Pagecount | Runtime | S.date | E.date |
+| -- | ----- | ------ | ------ | ------ | --------- | ------- | ------ | ------ |
+|    |       |        |        |        |           |         |        |        |
+|    |       |        |        |        |           |         |        |        |
+
+**Notes:**
+
+* **Title** and **Format** are compulsory.
+* Other fields can be auto-suggested using an LLM and confirmed by the user.
+* **Start date (S.date)** defaults to `now`.
+* **End date (E.date)** defaults to `None`.
+
+---
+
+## Features
+
+### 1. Basics
+
 ```
-| SN  | Title | Author | Format | P.date | Pagecount | runtime | S.date | E.date|
-|-----|-------|--------|--------|--------|-----------|---------|--------|-------|
-|     |       |        |        |        |           |         |        |       |
-|     |       |        |        |        |           |         |        |       |
---------------------------------------------------------------------------------
-```
-Title and format should be compulsory , The rest we ask LLMs to find and the user to confirm . In terms of Start date we default to now and end date we default to None.
-# Features
-##  Basics:
-```
-book -- delete "Title"
-book -- Finish # Updates the E.date to today
-book -- Import 
-book -- Export <desired_format>
-book --edit --name_of_column "value_to_add" 
+book --delete "Title"
+book --finish        # Updates the E.date to today
+book --import        # Import entries
+book --export <format>
+book --edit --<column_name> "value_to_add"
 ```
 
-## book --add  usage:
+---
+
+### 2. Adding a Book
+
+**Full command example:**
+
 ```
-book --add --title "The Stranger" --author "Albert Camus" --format "Physical" 
+book --add --title "The Stranger" --author "Albert Camus" --format "Physical"
+```
 
-OR
+**Interactive mode:**
 
-book --add 
-1.What is the title of the book?
-2.What is the format of the book?(choose one)
-	a.Physical
-	b.Audiobook
-	c.E-book
+```
+book --add
 
-"""
-This is for later after we make a basic one 
+1. What is the title of the book?
+2. What is the format of the book? (choose one)
+   a. Physical
+   b. Audiobook
+   c. E-book
 
-Would you like to autocomplete the rest of the entry?(Y/N)
+Would you like to autocomplete the rest of the entry? (Y/N)
 if Y:
-	take 1,2 and then autocomplete with an LLM ,Vefiry with user
-else :
-	Goto Q3	
-"""
-
-
-3.What is the Name of the Author?
-4.  ....
-5.  ....
-   etc 
-   etc
+    - Use LLM to fill remaining fields
+    - Verify with user
+else:
+    - Ask remaining fields one by one (Author, Publication date, Page count, Runtime, etc.)
 ```
 
-Aditionally if a user uses book --add with incomplete data then we resort to asking questions for eg :
+**Partial command example:**
 
 ```
-
 book --add --title "The Republic" --format "E-book"
-
-What is the name of the author?
-What is the Publication date?
-etc etc 
-
-Essentially the idea is to pick up with questions wherever the user left off with the command.
-
-book --add --title "The Republic" --format"E-book" --autoupdate
-
-# --autoupdate is basically saying do the rest with an LLM.
 ```
 
-## book --list usage:
+* CLI will continue interactively, asking for missing fields.
+* Optional: `--autoupdate` flag will allow LLM to fill remaining fields automatically.
+
+---
+
+### 3. Listing Books
 
 ```
-book --list 
-book --list -a "author name" #will list all the books with that authors title 
-book --list -g "genre"
-book --list -f "format"
-
-#ideally the list function should do multi level filtering too so smth like
-book list -a "camus" -f "audiobook" -genre "fiction" 
-
-#little more advanced
-
-book --list --sort #A-Z by default
-book --list --sort -pc #by page count
-book --list --sort -date
-book --list --sort -S.date
-
-
-#Then we think about something like :
-book list -a "camus" -f "audiobook" -genre "fiction" --sort -pc
+book --list                       # List all books
+book --list -a "author name"       # Filter by author
+book --list -g "genre"             # Filter by genre
+book --list -f "format"            # Filter by format
 ```
 
-## book -- recap usage:
+**Multi-level filtering example:**
+
 ```
-book --recap -a "authorname" and/or -i "[weeks][year][etc]" 
-
-Should diplay something like :
-
-Recap for books from Autohor:name in the past x days/weeks
-===============================================
-Books read: int
-Finished books :
-Pending Books :
-Total Page count: int
-Average Page count : int
-Aveage number of days take to finsh a book:
-Max no of days taken to finsih a book : days(Title)
-
-# We dont have to show all of this just an example 
+book --list -a "Camus" -f "Audiobook" -g "Fiction"
 ```
 
-## Other potential features for the future:
-1. $EDITOR ->YAML (make entries into YAML files that can be loaded and edited in any editor)
- ⁠
-##  Implementation
-SQL backend
-Python
-Standard library
-CLI -> UI
+**Sorting options:**
+
+```
+book --list --sort                # Default: A-Z by title
+book --list --sort -pc            # By page count
+book --list --sort -date          # By publication date
+book --list --sort -S.date        # By start date
+```
+
+**Advanced example:**
+
+```
+book --list -a "Camus" -f "Audiobook" -g "Fiction" --sort -pc
+```
+
+---
+
+### 4. Recap / Analytics
+
+```
+book --recap -a "author_name" -i "[weeks|months|years]"
+```
+
+**Example output:**
+
+```
+Recap for books by Author: Albert Camus in the past 30 days
+===========================================================
+Books read: 3
+Finished books: 2
+Pending books: 1
+Total page count: 820
+Average page count: 273
+Average days to finish a book: 5
+Max days taken to finish a book: 7 (The Stranger)
+```
+
+---
+
+### 5. Future Features
+
+1. **$EDITOR -> YAML:**
+
+   * Export entries as YAML files
+   * Editable in any editor and reloadable into CLI
+
+---
+
+### 6. Implementation Notes
+
+* **Backend:** SQL database
+* **Language:** Python
+* **Libraries:** Standard library only
+* **Interface:** CLI
