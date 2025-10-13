@@ -13,10 +13,10 @@ def delete():
 def finish():
 	print("finish function will be here ")
 	return
-def Import():
+def import_():
 	print("import function will be here ")
 	return
-def Export():
+def export_():
 	print("Export function will be here ")
 	return
 def list():
@@ -81,34 +81,30 @@ def main():
 			if not user_input:
 				continue
 			
-			args = parser.parse_args(user_input.split())
-
-			if args.action == "list":
-				list()
-			elif args.action == "add":
-				add()
-			elif args.action =="edit":
-				edit()
-			elif args.action =="finish":
-				finish()
-			elif args.action =="delete":
-				delete()
-			elif args.action =="Import":
-				Import()
-			elif args.action =="Export":
-				Export()
-			elif args.action =="recap":
-				recap()
-			elif args.action =="clear":
-				loadscreen.welcome()
-
+			args = parser.parse_args(user_input.split()) 
+			
+			command={
+				"add":add,
+				"list":list,
+				"edit":edit,
+				"finish":finish,
+				"delete":delete,
+				"import":import_,
+				"export":export_,
+				"recap":recap,
+				"clear":loadscreen.welcome()
+			}
+			func = command.get(args.action)
+			if func:
+				func()
+			
 		except SystemExit:
 			continue
 		except KeyboardInterrupt:
 			print("\nThanks for using books")
 			break
 
-			
+
 
 
 

@@ -2,10 +2,10 @@
 
 ## Data Fields
 
-| SN | Title | Author | Format | P.date | Pagecount | Runtime | S.date | E.date |
-| -- | ----- | ------ | ------ | ------ | --------- | ------- | ------ | ------ |
-|    |       |        |        |        |           |         |        |        |
-|    |       |        |        |        |           |         |        |        |
+| ISBN   | Title | Author | Format | Pagecount| Runtime | S.date | E.date |
+| -------| ----- | ------ | ------ |--------- | ------- | ------ | ------ |
+|        |       |        |        |          |         |        |        |
+|        |       |        |        |          |         |        |        |
 
 **Notes:**
 
