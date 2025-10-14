@@ -50,7 +50,7 @@ class Library:
         target_book = self._get_single_book_for("update", identifiers)
         updated_book = target_book.copy(**updates)
         updated_book.validate()
-        self.repository.save(updated_book)
+        self.repository.update(updated_book)
 
         return updated_book
 
