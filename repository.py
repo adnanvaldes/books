@@ -29,7 +29,7 @@ class Repository(ABC):
         pass
 
     @abstractmethod
-    def update(self, **kwargs) -> None:
+    def update(self, book: Book) -> None:
         """Update one or more fields for matching records"""
         pass
 
