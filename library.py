@@ -92,6 +92,13 @@ class Library:
             previews.append(preview_book)
         return previews
 
+    def delete(self, **identifiers: Any) -> None:
+        if not identifiers:
+            raise NoIdentifiersError
+
+        target_book = self._get_single_book_for("delete", identifiers)
+        self.repository.delete(book=target_book)
+
     def _get_single_book_for(self, action: str, identifiers: Dict) -> Book:
         matching_books = self.repository.list(**identifiers)
 
