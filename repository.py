@@ -71,7 +71,8 @@ class SQLRepository(Repository):
 			book.pages,
 			book.runtime,
 			book.start_date.isoformat() if book.start_date else None,
-			book.finish_date.isoformat() if book.finish_date else None
+			book.finish_date.isoformat() if book.finish_date else None,
+			book.id
     		))
             
         else:
@@ -90,10 +91,10 @@ class SQLRepository(Repository):
     def update(self, book: Book) -> None:
         self.save(book)
         
-    def delete(self, book_id: int) -> None:
+    def delete(self, book: Book) -> None:
         """Delete a book by id"""
-        self.cursor.execute("DELETE FROM books WHERE id = ?", (book_id,))
-        self.conn.commit()#will update this bassed on the libeary function of 
+        self.cursor.execute("DELETE FROM books WHERE id = ?", (book.id,))
+        self.conn.commit()
     
     def list(self, **identifiers: Any) -> List[Book]:
         query="SELECT id, title, author, format, isbn, pages, runtime, start_date, finish_date FROM books"
@@ -104,15 +105,15 @@ class SQLRepository(Repository):
             to_date = identifiers.pop('to', None)
             
             for key,value in identifiers.items():
+                if from_date:
+                    conditions.append(f"{key}>=?")
+                    parms.append(from_date)
+                elif to_date:
+                    conditions.append(f"{key}<=?")
+                    parms.append(to_date)     
                 conditions.append(f"{key} = ?")
                 parms.append(value)
-            if from_date:
-                conditions.append(f"{key}>=?")
-                parms.append(from_date)
-            if to_date:
-                conditions.append(f"{key}<=?")
-                parms.append(to_date)                
-                
+                    
             query += " WHERE " + " AND ".join(conditions)
         #we use this system and not directly author={authorname} because we want to avoid maliciuos commands which may create the wrong query and also to deal with special characters.
         self.cursor.execute(query,parms)
