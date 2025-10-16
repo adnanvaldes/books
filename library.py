@@ -15,12 +15,14 @@ class NoBooksFoundError(Exception):
 class TooManyBooksFoundError(Exception):
     """Raise when too many books match the given identifiers"""
 
-    def __init__(self, action: str, identifiers: Dict):
+    def __init__(self, action: str, identifiers: Dict, books: List):
         self.action = action
         self.identifiers = identifiers
         super().__init__(
-            f"Multiple books found matching {identifiers}.\nCannot {action}. Please be more specific."
+            f"Based on {identifiers}.\nCannot {action}. Please be more specific."
         )
+        for book in books:
+            print(book)
 
 
 class NoIdentifiersError(Exception):
@@ -39,7 +41,6 @@ class Library:
         book = Book(**data)
         book.validate()
 
-        self._validate_add(book)
         self.repository.save(book)
         return book
 
@@ -50,7 +51,7 @@ class Library:
         target_book = self._get_single_book_for("update", identifiers)
         updated_book = target_book.copy(**updates)
         updated_book.validate()
-        self.repository.update(updated_book)
+        self.repository.update(book=updated_book)
 
         return updated_book
 
@@ -98,6 +99,6 @@ class Library:
             raise NoBooksFoundError(identifiers)
 
         if len(matching_books) > 1:
-            raise TooManyBooksFoundError(action, identifiers)
+            raise TooManyBooksFoundError(action, identifiers, matching_books)
 
         return matching_books[0]
