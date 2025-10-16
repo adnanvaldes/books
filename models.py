@@ -12,6 +12,7 @@ class BookFormat(Enum):
 
 @dataclass
 class Book:
+    id: int
     title: str
     author: str
     format: BookFormat
