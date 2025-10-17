@@ -4,6 +4,7 @@ from library import Library
 from typing import Dict
 from repository import SQLRepository
 from datetime import date
+from tabulate import tabulate
 repository = SQLRepository()
 library = Library(repository)  
 def add(data:Dict):
@@ -27,13 +28,14 @@ def import_():
 def export_():
 	print("Export function will be here ")
 	return
-def list_():
-	print("list function will be here ")
+def list_(data:Dict):
+    data.pop('action', None)
+    clean_data= {key:value for key,value in data.items() if value is not None}
+    Books=library.list_(**clean_data)
+    print(tabulate(Books))
+    
 def recap():
 	print("recap function will be here")
-
-    
-    
 
 def main():
 	loadscreen.welcome()
@@ -107,9 +109,10 @@ def main():
 				"import":import_,
 				"export":export_,
 				"recap":recap,
-				"clear":loadscreen.welcome
+				"clear":loadscreen.welcome()
 			}
 			func = command.get(args.action)
+			# print(vars(args))
 			if func:
 				func(vars(args))
 			

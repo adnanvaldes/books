@@ -71,9 +71,8 @@ class Library:
         return finished_book
 
     def list_(self, **identifiers) -> List[Book]:
-        if not identifiers:
+        if all(value is None for value in identifiers.values()):
             return self.repository.list()
-
         return self.repository.list(**identifiers)
 
     def preview(
