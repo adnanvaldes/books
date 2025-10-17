@@ -4,13 +4,12 @@ from library import Library
 from typing import Dict
 from repository import SQLRepository
 from datetime import date
-    
+repository = SQLRepository()
+library = Library(repository)  
 def add(data:Dict):
-    repository = SQLRepository()
-    library = Library(repository)
     data.pop('action', None)
     print("added book entry as :",library.add(data))
-    
+    #add -a camus -t Stranger -f book -p 123
     
     return
 def edit():
@@ -49,7 +48,7 @@ def main():
 	list_parser = subparsers.add_parser('list', help='List books')
 
 	list_parser.add_argument('-a', '--author', type=str, help='name of author')
-	list_parser.add_argument('-t','--title',type=StopIteration,help='name of book')
+	list_parser.add_argument('-t','--title',type=str,help='name of book')
 	list_parser.add_argument('-f','--format',type=str,help="eg: (pysical,e-book,audiobook)")
 	list_parser.add_argument('-i','--isbn',type=str,help='Code to help define genre')
 	list_parser.add_argument('-p','--pages',type=int,help="number of pages")
@@ -60,7 +59,7 @@ def main():
     # ADD subcommand
 	add_parser = subparsers.add_parser('add', help='Add a book')
 	add_parser.add_argument('-a', '--author', type=str, help='name of author')
-	add_parser.add_argument('-t','--title',type=StopIteration,help='name of book')
+	add_parser.add_argument('-t','--title',type=str,help='name of book')
 	add_parser.add_argument('-f','--format',type=str,help="eg: (pysical,e-book,audiobook)")
 	add_parser.add_argument('-i','--isbn',type=str,help='Code to help define genre')
 	add_parser.add_argument('-p','--pages',type=int,help="number of pages")
@@ -101,7 +100,7 @@ def main():
 			args = parser.parse_args(user_input.split()) 
 			command={
 				"add":add,
-				"list":list,
+				"list":list_,
 				"edit":edit,
 				"finish":finish,
 				"delete":delete,

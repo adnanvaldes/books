@@ -1,5 +1,5 @@
 from typing import Dict, List, Any
-
+import uuid
 from models import Book
 from repository import Repository
 
@@ -38,7 +38,8 @@ class Library:
         self.repository = repository
 
     def add(self, data: Dict[str, Any]) -> Book:
-        book = Book(**data)
+        data['id'] = str(uuid.uuid4())
+        book=Book.from_dict(data)
         book.validate()
 
         self.repository.save(book)

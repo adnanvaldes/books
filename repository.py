@@ -79,7 +79,7 @@ class SQLRepository(Repository):
             self.cursor.execute("INSERT INTO books(title,author,format,isbn,pages,runtime,start_date,finish_date) VALUES(?,?,?,?,?,?,?,?)",(
 			book.title,
 			book.author,
-			book.format.value,  # convert Enum to string
+			book.format.value,  
 			book.isbn,
 			book.pages,
 			book.runtime,
