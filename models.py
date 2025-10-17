@@ -1,4 +1,4 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, replace
 from datetime import date
 from enum import Enum
 from typing import Dict, Any
@@ -21,6 +21,9 @@ class Book:
     start_date: date | None
     finish_date: date | None = None
 
+    def copy(self, **changes: Any) -> "Book":
+        return replace(self, **changes)
+
     def finish(self):
         self.finish_date = date.today()
 
@@ -33,9 +36,6 @@ class Book:
 
         if self.format == BookFormat.AUDIO and not self.runtime:
             raise ValueError("Audiobook must have runtime")
-
-    def __str__(self):
-        return f"{self.title} [{self.author}]\t{self.is_finished()}"
 
     def to_dict(self) -> dict:
         book = asdict(self)
@@ -52,3 +52,9 @@ class Book:
             if data.get(d) and isinstance(data[d], str):
                 data[d] = date.fromisoformat(data[d])
         return cls(**data)
+
+    def __str__(self):
+        return f"{self.title} [{self.author}]\t{self.is_finished()}"
+
+    def __copy__(self):
+        return self.copy()
