@@ -1,9 +1,18 @@
 import loadscreen
 import argparse
-
-def add():
-	print("add function will be here ")
-	return
+from library import Library
+from typing import Dict
+from repository import SQLRepository
+from datetime import date
+    
+def add(data:Dict):
+    repository = SQLRepository()
+    library = Library(repository)
+    data.pop('action', None)
+    print("added book entry as :",library.add(data))
+    
+    
+    return
 def edit():
 	print("edit function will be here ")
 	return
@@ -19,11 +28,13 @@ def import_():
 def export_():
 	print("Export function will be here ")
 	return
-def list():
+def list_():
 	print("list function will be here ")
 def recap():
 	print("recap function will be here")
 
+    
+    
 
 def main():
 	loadscreen.welcome()
@@ -37,23 +48,26 @@ def main():
 	# LIST subcommand
 	list_parser = subparsers.add_parser('list', help='List books')
 
-	list_parser.add_argument('-a', '--author', type=str, help='Filter by author')
-	list_parser.add_argument('-g', '--genre', type=str, help='Filter by genre')
-	list_parser.add_argument('-f', '--format', type=str, help='Filter by format')
-	list_parser.add_argument('--sort', nargs='?', const='title', help='Sort results')
-	list_parser.add_argument('-pc', '--page-count', action='store_true', help='Sort by page count')
-	list_parser.add_argument('-date', '--date', action='store_true', help='Sort by date')
-	list_parser.add_argument('-S', '--start-date', action='store_true', help='Sort by start date')
-    
+	list_parser.add_argument('-a', '--author', type=str, help='name of author')
+	list_parser.add_argument('-t','--title',type=StopIteration,help='name of book')
+	list_parser.add_argument('-f','--format',type=str,help="eg: (pysical,e-book,audiobook)")
+	list_parser.add_argument('-i','--isbn',type=str,help='Code to help define genre')
+	list_parser.add_argument('-p','--page',type=int,help="number of pages")
+	list_parser.add_argument('-r','--runtime',type=int,help="total runtime in case of audiobooks")
+	list_parser.add_argument('-sd','--start_date',type =date,help="date when the user started the book")
+	list_parser.add_argument('-fd','--finish_date',type=date,help="date the user finished the book ")
+ 
     # ADD subcommand
 	add_parser = subparsers.add_parser('add', help='Add a book')
-	add_parser.add_argument('-a', '--author', type=str, help='Filter by author')
-	add_parser.add_argument('-g', '--genre', type=str, help='Filter by genre')
-	add_parser.add_argument('-f', '--format', type=str, help='Filter by format')
-	add_parser.add_argument('--sort', nargs='?', const='title', help='Sort results')
-	add_parser.add_argument('-pc', '--page-count', action='store_true', help='Sort by page count')
-	add_parser.add_argument('-date', '--date', action='store_true', help='Sort by date')
-	add_parser.add_argument('-S', '--start-date', action='store_true', help='Sort by start date')
+	add_parser.add_argument('-a', '--author', type=str, help='name of author')
+	add_parser.add_argument('-t','--title',type=StopIteration,help='name of book')
+	add_parser.add_argument('-f','--format',type=str,help="eg: (pysical,e-book,audiobook)")
+	add_parser.add_argument('-i','--isbn',type=str,help='Code to help define genre')
+	add_parser.add_argument('-p','--page',type=int,help="number of pages")
+	add_parser.add_argument('-r','--runtime',type=int,help="total runtime in case of audiobooks")
+	add_parser.add_argument('-sd','--start_date',type =date,help="date when the user started the book")
+	add_parser.add_argument('-fd','--finish_date',type=date,help="date the user finished the book ")
+	
     
     # DELETE subcommand
 	delete_parser = subparsers.add_parser('delete', help='Delete a book')
@@ -61,28 +75,30 @@ def main():
     
     # EDIT subcommand
 	edit_parser = subparsers.add_parser('edit', help='Edit a book')
-	edit_parser.add_argument('-a', '--author', type=str, help='Filter by author')
-	edit_parser.add_argument('-g', '--genre', type=str, help='Filter by genre')
-	edit_parser.add_argument('-f', '--format', type=str, help='Filter by format')
-	edit_parser.add_argument('--sort', nargs='?', const='title', help='Sort results')
-	edit_parser.add_argument('-pc', '--page-count', action='store_true', help='Sort by page count')
-	edit_parser.add_argument('-date', '--date', action='store_true', help='Sort by date')
-	edit_parser.add_argument('-S', '--start-date', action='store_true', help='Sort by start date')
-
+	
     # FINISH subcommand
 	finish_parser = subparsers.add_parser('finish', help='Mark book as finished')
 	while True:
 		try:
 			user_input=input("> ").strip()
-			
 			if user_input in ['exit','quit']:
 				print("\nThanks for using books")
 				break
 			if not user_input:
 				continue
-			
+			"""
+   				this is how args looks like for eg 
+				args = Namespace(
+				action='list',
+				author='John Doe',
+				genre=None,
+				format=None,
+				sort='title',
+				page_count=False,
+				date=False,
+				start_date=False)
+       		"""
 			args = parser.parse_args(user_input.split()) 
-			
 			command={
 				"add":add,
 				"list":list,
@@ -92,11 +108,11 @@ def main():
 				"import":import_,
 				"export":export_,
 				"recap":recap,
-				"clear":loadscreen.welcome()
+				"clear":loadscreen.welcome
 			}
 			func = command.get(args.action)
 			if func:
-				func()
+				func(vars(args))
 			
 		except SystemExit:
 			continue
