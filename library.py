@@ -54,15 +54,13 @@ class Library:
         if not identifiers:
             raise NoIdentifiersError
 
-        target_book = self._get_single_book_for("finish", identifiers)
-        if target_book.is_finished():
-            return target_book
+        book = self._get_single_book_for("finish", identifiers)
+        if book.is_finished():
+            return book
+        book.finish()
 
-        finished_book = target_book.copy()
-        finished_book.finish()
-
-        self.repository.save(finished_book)
-        return finished_book
+        self.repository.save(book)
+        return book
 
     def list_(self, **identifiers) -> List[Book]:
         if not identifiers:
