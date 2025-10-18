@@ -7,15 +7,46 @@ from datetime import date
 from tabulate import tabulate
 repository = SQLRepository()
 library = Library(repository)  
+#books edit --title "The Stranger" --author "Albert Camus" --set-pages 90
+"""
+{
+    
+    'author': 'John Doe',
+    'title': 'hello',
+    'format': 'physical',
+    'isbn': None,
+    'pages': None,
+    'runtime': None,
+    'start_date': None,
+    'finish_date': None,
+
+    'pairs': ['pages', '500', 'author', 'Jane Smith', 'format', 'e-book']
+}
+"""
 def add(data:Dict):
     data.pop('action', None)
     print("added book entry as :",library.add(data))
     #add -a camus -t Stranger -f book -p 123
-    
     return
-def edit():
-	print("edit function will be here ")
-	return
+
+def edit(data:Dict):
+    data.pop('action',None)
+    data.pop('edit_action', None)
+    identifiers={}
+    updates={}
+    for k,v in data.items():
+        if k is not 'pairs':
+            identifiers[k]=v
+        else:
+            if len(v) % 2 != 0:
+                print(f"Incomplete command, please enter values for each field you want to update")
+            else:
+                updates=dict(zip(v[::2],v[1::2]))
+    identifiers={key:value for key,value in identifiers.items() if value is not None }
+    print(f"updated entry to {library.update(updates,**identifiers)}")
+    return
+    
+        
 def delete():
 	print("delete function will be here ")
 	return
@@ -46,7 +77,22 @@ def main():
 
 	subparsers=parser.add_subparsers(dest="action",required=True)
 	clear_parser = subparsers.add_parser('clear', help='CLS')
-	# LIST subcommand
+	#EDIT SUBCOMMAND
+	edit_parser =subparsers.add_parser('edit', help='to edit existing book entries')
+ 
+	edit_parser.add_argument('-a', '--author', type=str, help='name of author')
+	edit_parser.add_argument('-t','--title',type=str,help='name of book')
+	edit_parser.add_argument('-f','--format',type=str,help="eg: (pysical,e-book,audiobook)")
+	edit_parser.add_argument('-i','--isbn',type=str,help='Code to help define genre')
+	edit_parser.add_argument('-p','--pages',type=int,help="number of pages")
+	edit_parser.add_argument('-r','--runtime',type=int,help="total runtime in case of audiobooks")
+	edit_parser.add_argument('-sd','--start_date',type =date,help="date when the user started the book")
+	edit_parser.add_argument('-fd','--finish_date',type=date,help="date the user finished the book ")
+ 
+	edit_subparsers = edit_parser.add_subparsers(dest='edit_action', help='Edit actions')
+	set_parser = edit_subparsers.add_parser('set', help='Set book properties')
+	set_parser.add_argument('pairs',nargs='+',help='field value pairs (e.g., pages 123 author "John Doe")')#this lets me add multiple key value pairs after -set the '+' means one or more than one args x
+ 	# LIST subcommand
 	list_parser = subparsers.add_parser('list', help='List books')
 
 	list_parser.add_argument('-a', '--author', type=str, help='name of author')
@@ -73,10 +119,6 @@ def main():
     # DELETE subcommand
 	delete_parser = subparsers.add_parser('delete', help='Delete a book')
 	delete_parser.add_argument('title', type=str, help='Book title')
-    
-    # EDIT subcommand
-	edit_parser = subparsers.add_parser('edit', help='Edit a book')
-	
     # FINISH subcommand
 	finish_parser = subparsers.add_parser('finish', help='Mark book as finished')
 	while True:
