@@ -5,22 +5,42 @@ from typing import Dict, Any
 
 
 class BookFormat(Enum):
-    BOOK = "book"
+    PRINT = "print"
     EBOOK = "ebook"
-    AUDIO = "audiobook"
+    AUDIO = "audio"
 
 
 @dataclass
 class Book:
-    id : int | None
+    id: int | None
     title: str
     author: str
     format: BookFormat
-    isbn: str | None
-    pages: int | None
-    runtime: int | None  # time measured in minutes
-    start_date: date | None
+    isbn: str | None = None
+    pages: int | None = None
+    runtime: int | None = None  # time measured in minutes
+    start_date: date | None = None
     finish_date: date | None = None
+
+    def __post_init__(self):
+        if isinstance(self.format, str):
+            try:
+                fmt = "audio" if self.format.lower() == "audiobook" else self.format
+                self.format = BookFormat(fmt.lower())
+            except ValueError:
+                raise ValueError(f"Invalid book format: {self.format}")
+
+        if isinstance(self.start_date, str):
+            try:
+                self.start_date = date.fromisoformat(self.start_date)
+            except ValueError:
+                raise ValueError(f"Invalid date format: {self.start_date}")
+
+        if isinstance(self.finish_date, str):
+            try:
+                self.finish_date = date.fromisoformat(self.finish_date)
+            except ValueError:
+                raise ValueError(f"Invalid date format: {self.finish_date}")
 
     def copy(self, **changes: Any) -> "Book":
         return replace(self, **changes)
@@ -32,7 +52,7 @@ class Book:
         return self.finish_date is not None
 
     def validate(self):
-        if self.format in (BookFormat.BOOK, BookFormat.EBOOK) and not self.pages:
+        if self.format in (BookFormat.PRINT, BookFormat.EBOOK) and not self.pages:
             raise ValueError(f"{self.format.value} must have page count")
 
         if self.format == BookFormat.AUDIO and not self.runtime:
@@ -55,7 +75,30 @@ class Book:
         return cls(**data)
 
     def __str__(self):
-        return f"{self.title} [{self.author}]\t{self.is_finished()}"
+        """
+        FORMAT | TITLE | AUTHOR | FINISHED | METADATA
+        (BOOK ) Dune [Frank Herbert]  YES   {s:2024-05-01, e:2024-05-28, 412p}
+        """
+        fmt = f"({self.format.value.upper()})"
+        title = f"{self.title[:16]:<16}"
+        author = f"[{self.author[:16]:<16}]"
+        finished = "Y" if self.is_finished() else "N"
+
+        details = []
+        if self.start_date:
+            details.append(f"s:{self.start_date.isoformat()}")
+        if self.finish_date:
+            details.append(f"e:{self.finish_date.isoformat()}")
+
+        if self.pages:
+            details.append(f"{self.pages}p")
+        elif self.runtime:
+            hours, minutes = self.runtime // 60, self.runtime % 60
+            details.append(f"{hours}h{minutes:02d}")
+
+        metadata = f"{{{', '.join(details)}}}" if details else ""
+        metadata = f"{metadata:<40}"
+        return f"{fmt} {title} {author} {finished} {metadata}"
 
     def __copy__(self):
         return self.copy()

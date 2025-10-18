@@ -18,11 +18,10 @@ class TooManyBooksFoundError(Exception):
     def __init__(self, action: str, identifiers: Dict, books: List):
         self.action = action
         self.identifiers = identifiers
+        self.books = books
         super().__init__(
-            f"Based on {identifiers}.\nCannot {action}. Please be more specific."
+            f"Too many books found with {identifiers}.\nCannot {action}. Please be more specific."
         )
-        for book in books:
-            print(book)
 
 
 class NoIdentifiersError(Exception):
