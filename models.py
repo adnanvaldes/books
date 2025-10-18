@@ -5,7 +5,7 @@ from typing import Dict, Any
 
 
 class BookFormat(Enum):
-    BOOK = "book"
+    PRINT = "print"
     EBOOK = "ebook"
     AUDIO = "audiobook"
 
@@ -32,7 +32,7 @@ class Book:
         return self.finish_date is not None
 
     def validate(self):
-        if self.format in (BookFormat.BOOK, BookFormat.EBOOK) and not self.pages:
+        if self.format in (BookFormat.PRINT, BookFormat.EBOOK) and not self.pages:
             raise ValueError(f"{self.format.value} must have page count")
 
         if self.format == BookFormat.AUDIO and not self.runtime:
