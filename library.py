@@ -63,9 +63,6 @@ class Library:
         return book
 
     def list_(self, **identifiers) -> List[Book]:
-        if not identifiers:
-            return self.repository.list()
-
         return self.repository.list(**identifiers)
 
     def preview(
