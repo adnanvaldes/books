@@ -22,6 +22,26 @@ class Book:
     start_date: date | None = None
     finish_date: date | None = None
 
+    def __post_init__(self):
+        if isinstance(self.format, str):
+            try:
+                fmt = "audio" if self.format.lower() == "audiobook" else self.format
+                self.format = BookFormat(fmt.lower())
+            except ValueError:
+                raise ValueError(f"Invalid book format: {self.format}")
+
+        if isinstance(self.start_date, str):
+            try:
+                self.start_date = date.fromisoformat(self.start_date)
+            except ValueError:
+                raise ValueError(f"Invalid date format: {self.start_date}")
+
+        if isinstance(self.finish_date, str):
+            try:
+                self.finish_date = date.fromisoformat(self.finish_date)
+            except ValueError:
+                raise ValueError(f"Invalid date format: {self.finish_date}")
+
     def copy(self, **changes: Any) -> "Book":
         return replace(self, **changes)
 
