@@ -42,6 +42,7 @@ class Repository(ABC):
 class SQLRepository(Repository):
     def __init__(self, db_path="books.db"):
         self.conn = sqlite3.connect(db_path)  # creates or connects with the file
+        self.conn.row_factory = sqlite3.Row
         self.cursor = self.conn.cursor()
         self.cursor.execute(
             """
@@ -59,88 +60,82 @@ class SQLRepository(Repository):
 		"""
         )  # we are actually createing the table if it doesnot exist and thereason why datatypes are different here than the models  is because models are purely pythonic and this is for SQL initilization.
 
-    def save(self, book: Book) -> None:
-        existing = self.cursor.execute(
-            "SELECT id FROM books WHERE id = ?", (book.id,)
-        ).fetchone()
-        if existing:
-            self.cursor.execute(
-                """
-            UPDATE books 
-            SET title = ?, author = ?, format = ?, isbn = ?, pages = ?, runtime = ?, start_date = ?, finish_date = ?
-            WHERE id = ?
-                        """,
-                (
-                    book.title,
-                    book.author,
-                    book.format.value,
-                    book.isbn,
-                    book.pages,
-                    book.runtime,
-                    book.start_date.isoformat() if book.start_date else None,
-                    book.finish_date.isoformat() if book.finish_date else None,
-                    book.id,
-                ),
-            )
-
-        else:
-            self.cursor.execute(
-                "INSERT INTO books(title,author,format,isbn,pages,runtime,start_date,finish_date) VALUES(?,?,?,?,?,?,?,?)",
-                (
-                    book.title,
-                    book.author,
-                    book.format.value,  # convert Enum to string
-                    book.isbn,
-                    book.pages,
-                    book.runtime,
-                    book.start_date.isoformat() if book.start_date else None,
-                    book.finish_date.isoformat() if book.finish_date else None,
-                ),
-            )
+    def save(self, book: Book) -> Book:
+        query = """
+            INSERT INTO books (title, author, format, isbn, pages, runtime, start_date, finish_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """
+        self.cursor.execute(
+            query,
+            (
+                book.title,
+                book.author,
+                book.format.value,
+                book.isbn,
+                book.pages,
+                book.runtime,
+                book.start_date.isoformat() if book.start_date else None,
+                book.finish_date.isoformat() if book.finish_date else None,
+            ),
+        )
         self.conn.commit()
+        book.id = self.cursor.lastrowid
+        return book
 
-    def update(self, book: Book) -> None:
-        self.save(book)
+    def update(self, book: Book) -> Book:
+        if book.id is None:
+            raise ValueError("Cannot update a book without an ID")
+
+        query = """
+            UPDATE books
+            SET title=?, author=?, format=?, isbn=?, pages=?, runtime=?, start_date=?, finish_date=?
+            WHERE id=?
+        """
+        self.cursor.execute(
+            query,
+            (
+                book.title,
+                book.author,
+                book.format.value,
+                book.isbn,
+                book.pages,
+                book.runtime,
+                book.start_date.isoformat() if book.start_date else None,
+                book.finish_date.isoformat() if book.finish_date else None,
+                book.id,
+            ),
+        )
+        self.conn.commit()
+        return book
 
     def delete(self, book: Book) -> None:
-        """Delete a book by id"""
-        self.cursor.execute("DELETE FROM books WHERE id = ?", (book.id,))
+        if book.id is None:
+            raise ValueError("Cannot delete a book without an ID")
+        self.cursor.execute("DELETE FROM books WHERE id=?", (book.id,))
         self.conn.commit()
 
-    def list(self, **identifiers: Any) -> List[Book]:
-        query = "SELECT id, title, author, format, isbn, pages, runtime, start_date, finish_date FROM books"
-        parms = []
-        if identifiers:
-            conditions = []
-            from_date = identifiers.pop("from", None)
-            to_date = identifiers.pop("to", None)
+    def list(self, **filters: Any) -> List[Book]:
+        query = "SELECT * FROM books"
+        clauses, params = [], []
 
-            for key, value in identifiers.items():
-                if from_date:
-                    conditions.append(f"{key}>=?")
-                    parms.append(from_date)
-                elif to_date:
-                    conditions.append(f"{key}<=?")
-                    parms.append(to_date)
-                conditions.append(f"{key} = ?")
-                parms.append(value)
+        from_date = filters.pop("from_date", None)
+        to_date = filters.pop("to_date", None)
 
-            query += " WHERE " + " AND ".join(conditions)
-        # we use this system and not directly author={authorname} because we want to avoid maliciuos commands which may create the wrong query and also to deal with special characters.
-        self.cursor.execute(query, parms)
+        for key, value in filters.items():
+            if value is not None:
+                clauses.append(f"{key} = ?")
+                params.append(value)
+
+        if from_date:
+            clauses.append("start_date >= ?")
+            params.append(from_date)
+        if to_date:
+            clauses.append("finish_date <= ?")
+            params.append(to_date)
+
+        if clauses:
+            query += " WHERE " + " AND ".join(clauses)
+
+        self.cursor.execute(query, params)
         rows = self.cursor.fetchall()
-        books = []
-        for row in rows:
-            book_data = {
-                "id": row[0],
-                "title": row[1],
-                "author": row[2],
-                "format": row[3],  # Will be converted back to Enum in Book.__init__
-                "isbn": row[4],
-                "pages": row[5],
-                "runtime": row[6],
-                "start_date": row[7],  # Will be parsed in Book.__init__
-                "finish_date": row[8],
-            }
-            books.append(Book(**book_data))
-        return books
+        return [Book.from_dict(dict(row)) for row in rows]
