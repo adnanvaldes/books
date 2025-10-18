@@ -114,40 +114,28 @@ class SQLRepository(Repository):
         self.cursor.execute("DELETE FROM books WHERE id=?", (book.id,))
         self.conn.commit()
 
-    def list(self, **identifiers: Any) -> List[Book]:
-        query = "SELECT id, title, author, format, isbn, pages, runtime, start_date, finish_date FROM books"
-        parms = []
-        if identifiers:
-            conditions = []
-            from_date = identifiers.pop("from", None)
-            to_date = identifiers.pop("to", None)
+    def list(self, **filters: Any) -> List[Book]:
+        query = "SELECT * FROM books"
+        clauses, params = [], []
 
-            for key, value in identifiers.items():
-                if from_date:
-                    conditions.append(f"{key}>=?")
-                    parms.append(from_date)
-                elif to_date:
-                    conditions.append(f"{key}<=?")
-                    parms.append(to_date)
-                conditions.append(f"{key} = ?")
-                parms.append(value)
+        from_date = filters.pop("from_date", None)
+        to_date = filters.pop("to_date", None)
 
-            query += " WHERE " + " AND ".join(conditions)
-        # we use this system and not directly author={authorname} because we want to avoid maliciuos commands which may create the wrong query and also to deal with special characters.
-        self.cursor.execute(query, parms)
+        for key, value in filters.items():
+            if value is not None:
+                clauses.append(f"{key} = ?")
+                params.append(value)
+
+        if from_date:
+            clauses.append("start_date >= ?")
+            params.append(from_date)
+        if to_date:
+            clauses.append("finish_date <= ?")
+            params.append(to_date)
+
+        if clauses:
+            query += " WHERE " + " AND ".join(clauses)
+
+        self.cursor.execute(query, params)
         rows = self.cursor.fetchall()
-        books = []
-        for row in rows:
-            book_data = {
-                "id": row[0],
-                "title": row[1],
-                "author": row[2],
-                "format": row[3],  # Will be converted back to Enum in Book.__init__
-                "isbn": row[4],
-                "pages": row[5],
-                "runtime": row[6],
-                "start_date": row[7],  # Will be parsed in Book.__init__
-                "finish_date": row[8],
-            }
-            books.append(Book(**book_data))
-        return books
+        return [Book.from_dict(dict(row)) for row in rows]
