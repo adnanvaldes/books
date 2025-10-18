@@ -132,4 +132,4 @@ class SQLRepository(Repository):
             'finish_date': row[8]
         }
             books.append(Book(**book_data))
-        return Book
+        return books
