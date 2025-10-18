@@ -1,7 +1,7 @@
 from typing import  Dict
 
 def tabulate(books:Dict):
-    headers = ["id","title","author","finish_date"]
+    headers = ["id","title","author","finish_date","isbn","format"]
     col_widths={h:len(str(h)) for h in headers}#this will make a dictionary where {header1:its length,header2 :its length}
     for book in books:
         for header in headers:
@@ -18,7 +18,11 @@ def tabulate(books:Dict):
     lines.append(seperator)
     
     for book in books:
-        line=" | ".join(str(getattr(book,h)).ljust(col_widths[h]) for h in headers)
+        line = " | ".join(
+			str(getattr(book, h).value if h == "format" else getattr(book, h)).ljust(col_widths[h])
+			for h in headers
+		)
         lines.append(line)
+
         
     return "\n".join(lines)
