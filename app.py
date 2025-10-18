@@ -31,9 +31,11 @@ def edit(data:Dict):
     return
     
         
-def delete():
-	print("delete function will be here ")
-	return
+def delete(data:dict):
+    data.pop('action',None)
+    data={key:value for key,value in data.items() if value is not None}
+    library.delete(**data)
+    return
 def finish():
 	print("finish function will be here ")
 	return
@@ -102,7 +104,15 @@ def main():
     
     # DELETE subcommand
 	delete_parser = subparsers.add_parser('delete', help='Delete a book')
-	delete_parser.add_argument('title', type=str, help='Book title')
+	delete_parser.add_argument('-a', '--author', type=str, help='name of author')
+	delete_parser.add_argument('-t','--title',type=str,help='name of book')
+	delete_parser.add_argument('-f','--format',type=str,help="eg: (pysical,e-book,audiobook)")
+	delete_parser.add_argument('-i','--isbn',type=str,help='Code to help define genre')
+	delete_parser.add_argument('-p','--pages',type=int,help="number of pages")
+	delete_parser.add_argument('-r','--runtime',type=int,help="total runtime in case of audiobooks")
+	delete_parser.add_argument('-sd','--start_date',type =date,help="date when the user started the book")
+	delete_parser.add_argument('-fd','--finish_date',type=date,help="date the user finished the book ")
+	
     # FINISH subcommand
 	finish_parser = subparsers.add_parser('finish', help='Mark book as finished')
 	while True:
