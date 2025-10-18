@@ -16,10 +16,10 @@ class Book:
     title: str
     author: str
     format: BookFormat
-    isbn: str | None
-    pages: int | None
-    runtime: int | None  # time measured in minutes
-    start_date: date | None
+    isbn: str | None = None
+    pages: int | None = None
+    runtime: int | None = None  # time measured in minutes
+    start_date: date | None = None
     finish_date: date | None = None
 
     def copy(self, **changes: Any) -> "Book":
