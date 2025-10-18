@@ -46,7 +46,6 @@ class Library:
 
         target_book = self._get_single_book_for("update", identifiers)
         updated_book = target_book.copy(**updates)
-        updated_book.validate()
         self.repository.update(book=updated_book)
 
         return updated_book
@@ -81,11 +80,7 @@ class Library:
         if updates is None:
             return books  # If not updates are passed, presumably deletion is happening
 
-        previews = []
-        for book in books:
-            preview_book = book.copy(**updates)
-            preview_book.validate()
-            previews.append(preview_book)
+        previews = [book.copy(**updates) for book in books]
         return previews
 
     def delete(self, **identifiers: Any) -> None:
