@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List,Any
+from typing import List, Any
 import sqlite3
 
 from models import Book
@@ -29,12 +29,12 @@ class Repository(ABC):
         pass
 
     @abstractmethod
-    def update(self, book: Book, **identifiers) -> None:
+    def update(self, book: Book) -> None:
         """Update one or more fields for matching records"""
         pass
 
     @abstractmethod
-    def delete(self, **kwargs) -> None:
+    def delete(self, book: Book) -> None:
         """Delete matching records"""
         pass
 
