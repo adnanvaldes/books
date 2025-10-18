@@ -64,7 +64,9 @@ class Book:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Book":
         if "format" in data and isinstance(data["format"], str):
-            data["format"] = BookFormat(data["format"])
+            fmt = "audio" if data["format"].lower() == "audiobook" else data["format"]
+            data["format"] = BookFormat(fmt.lower())
+
         for d in ["start_date", "finish_date"]:
             if data.get(d) and isinstance(data[d], str):
                 data[d] = date.fromisoformat(data[d])
