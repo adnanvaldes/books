@@ -77,7 +77,7 @@ class Book:
     def __str__(self):
         """
         FORMAT | TITLE | AUTHOR | FINISHED | METADATA
-        (BOOK ) Dune [Frank Herbert]  YES   {412p, s:2024-05-01, e:2024-05-28}
+        (BOOK ) Dune [Frank Herbert]  YES   {s:2024-05-01, e:2024-05-28, 412p}
         """
         fmt = f"({self.format.value.upper()})"
         title = f"{self.title[:16]:<16}"
