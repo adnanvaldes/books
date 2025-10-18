@@ -7,22 +7,6 @@ from datetime import date
 from tabulate import tabulate
 repository = SQLRepository()
 library = Library(repository)  
-#books edit --title "The Stranger" --author "Albert Camus" --set-pages 90
-"""
-{
-    
-    'author': 'John Doe',
-    'title': 'hello',
-    'format': 'physical',
-    'isbn': None,
-    'pages': None,
-    'runtime': None,
-    'start_date': None,
-    'finish_date': None,
-
-    'pairs': ['pages', '500', 'author', 'Jane Smith', 'format', 'e-book']
-}
-"""
 def add(data:Dict):
     data.pop('action', None)
     print("added book entry as :",library.add(data))
@@ -129,18 +113,6 @@ def main():
 				break
 			if not user_input:
 				continue
-			"""
-   				this is how args looks like for eg 
-				args = Namespace(
-				action='list',
-				author='John Doe',
-				genre=None,
-				format=None,
-				sort='title',
-				page_count=False,
-				date=False,
-				start_date=False)
-       		"""
 			args = parser.parse_args(user_input.split()) 
 			command={
 				"add":add,
