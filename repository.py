@@ -60,48 +60,53 @@ class SQLRepository(Repository):
 		"""
         )  # we are actually createing the table if it doesnot exist and thereason why datatypes are different here than the models  is because models are purely pythonic and this is for SQL initilization.
 
-    def save(self, book: Book) -> None:
-        existing = self.cursor.execute(
-            "SELECT id FROM books WHERE id = ?", (book.id,)
-        ).fetchone()
-        if existing:
-            self.cursor.execute(
-                """
-            UPDATE books 
-            SET title = ?, author = ?, format = ?, isbn = ?, pages = ?, runtime = ?, start_date = ?, finish_date = ?
-            WHERE id = ?
-                        """,
-                (
-                    book.title,
-                    book.author,
-                    book.format.value,
-                    book.isbn,
-                    book.pages,
-                    book.runtime,
-                    book.start_date.isoformat() if book.start_date else None,
-                    book.finish_date.isoformat() if book.finish_date else None,
-                    book.id,
-                ),
-            )
-
-        else:
-            self.cursor.execute(
-                "INSERT INTO books(title,author,format,isbn,pages,runtime,start_date,finish_date) VALUES(?,?,?,?,?,?,?,?)",
-                (
-                    book.title,
-                    book.author,
-                    book.format.value,  # convert Enum to string
-                    book.isbn,
-                    book.pages,
-                    book.runtime,
-                    book.start_date.isoformat() if book.start_date else None,
-                    book.finish_date.isoformat() if book.finish_date else None,
-                ),
-            )
+    def save(self, book: Book) -> Book:
+        query = """
+            INSERT INTO books (title, author, format, isbn, pages, runtime, start_date, finish_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """
+        self.cursor.execute(
+            query,
+            (
+                book.title,
+                book.author,
+                book.format.value,
+                book.isbn,
+                book.pages,
+                book.runtime,
+                book.start_date.isoformat() if book.start_date else None,
+                book.finish_date.isoformat() if book.finish_date else None,
+            ),
+        )
         self.conn.commit()
+        book.id = self.cursor.lastrowid
+        return book
 
-    def update(self, book: Book) -> None:
-        self.save(book)
+    def update(self, book: Book) -> Book:
+        if book.id is None:
+            raise ValueError("Cannot update a book without an ID")
+
+        query = """
+            UPDATE books
+            SET title=?, author=?, format=?, isbn=?, pages=?, runtime=?, start_date=?, finish_date=?
+            WHERE id=?
+        """
+        self.cursor.execute(
+            query,
+            (
+                book.title,
+                book.author,
+                book.format.value,
+                book.isbn,
+                book.pages,
+                book.runtime,
+                book.start_date.isoformat() if book.start_date else None,
+                book.finish_date.isoformat() if book.finish_date else None,
+                book.id,
+            ),
+        )
+        self.conn.commit()
+        return book
 
     def delete(self, book: Book) -> None:
         """Delete a book by id"""
