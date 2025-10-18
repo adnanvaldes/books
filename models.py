@@ -23,6 +23,9 @@ class Book:
     finish_date: date | None = None
 
     def __post_init__(self):
+        if not self.format:
+            raise ValueError("Format is required (e.g. print, audio, ebook)")
+
         if isinstance(self.format, str):
             try:
                 fmt = "audio" if self.format.lower() == "audiobook" else self.format
@@ -50,13 +53,6 @@ class Book:
 
     def is_finished(self):
         return self.finish_date is not None
-
-    def validate(self):
-        if self.format in (BookFormat.PRINT, BookFormat.EBOOK) and not self.pages:
-            raise ValueError(f"{self.format.value} must have page count")
-
-        if self.format == BookFormat.AUDIO and not self.runtime:
-            raise ValueError("Audiobook must have runtime")
 
     def to_dict(self) -> dict:
         book = asdict(self)
