@@ -7,7 +7,7 @@ from typing import Dict, Any
 class BookFormat(Enum):
     PRINT = "print"
     EBOOK = "ebook"
-    AUDIO = "audiobook"
+    AUDIO = "audio"
 
 
 @dataclass
@@ -55,7 +55,29 @@ class Book:
         return cls(**data)
 
     def __str__(self):
-        return f"{self.title} [{self.author}]\t{self.is_finished()}"
+        """
+        FORMAT | TITLE | AUTHOR | FINISHED | METADATA
+        (BOOK ) Dune [Frank Herbert]  YES   {412p, s:2024-05-01, e:2024-05-28}
+        """
+        fmt = f"({self.format.value.upper()})"
+        title = f"{self.title[:24]:<24}"
+        author = f"[{self.author[:16]:<16}]"
+        finished = "Y" if self.is_finished() else "N"
+
+        details = []
+        if self.pages:
+            details.append(f"{self.pages}p")
+        elif self.runtime:
+            hours, minutes = self.runtime // 60, self.runtime % 60
+            details.append(f"{hours}h{minutes:02d}")
+
+        if self.start_date:
+            details.append(f"s:{self.start_date.isoformat()}")
+        if self.finish_date:
+            details.append(f"e:{self.finish_date.isoformat()}")
+
+        metadata = f"{{{', '.join(details)}}}" if details else ""
+        return f"{fmt}{title}{author}{finished}{details}"
 
     def __copy__(self):
         return self.copy()
