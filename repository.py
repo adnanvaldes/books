@@ -109,8 +109,9 @@ class SQLRepository(Repository):
         return book
 
     def delete(self, book: Book) -> None:
-        """Delete a book by id"""
-        self.cursor.execute("DELETE FROM books WHERE id = ?", (book.id,))
+        if book.id is None:
+            raise ValueError("Cannot delete a book without an ID")
+        self.cursor.execute("DELETE FROM books WHERE id=?", (book.id,))
         self.conn.commit()
 
     def list(self, **identifiers: Any) -> List[Book]:
