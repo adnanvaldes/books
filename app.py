@@ -1,11 +1,12 @@
-import loadscreen
 import argparse
-from library import Library
-from typing import Dict
-from repository import SQLRepository
-from datetime import date
-from tabulate import tabulate
+import loadscreen
 import shlex
+from datetime import date
+from typing import Dict
+
+from library import Library
+from repository import SQLRepository
+from tabulate import tabulate
 
 
 def add(data: Dict):
