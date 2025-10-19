@@ -37,12 +37,8 @@ class Library:
         self.repository = repository
 
     def add(self, data: Dict[str, Any]) -> Book:
-        data['id'] = str(uuid.uuid4())
-        book=Book.from_dict(data)
-        book.validate()
-
-        self.repository.save(book)
-        return book
+        book = Book.from_dict({**data, "id": None})
+        return self.repository.save(book)
 
     def update(self, updates: Dict[str, Any], **identifiers: Any) -> Book:
         if not identifiers:
@@ -50,7 +46,6 @@ class Library:
 
         target_book = self._get_single_book_for("update", identifiers)
         updated_book = target_book.copy(**updates)
-        updated_book.validate()
         self.repository.update(book=updated_book)
 
         return updated_book
@@ -59,19 +54,15 @@ class Library:
         if not identifiers:
             raise NoIdentifiersError
 
-        target_book = self._get_single_book_for("finish", identifiers)
-        if target_book.is_finished():
-            return target_book
+        book = self._get_single_book_for("finish", identifiers)
+        if book.is_finished():
+            return book
+        book.finish()
 
-        finished_book = target_book.copy()
-        finished_book.finish()
-
-        self.repository.save(finished_book)
-        return finished_book
+        self.repository.save(book)
+        return book
 
     def list_(self, **identifiers) -> List[Book]:
-        if all(value is None for value in identifiers.values()):
-            return self.repository.list()
         return self.repository.list(**identifiers)
 
     def preview(
@@ -84,11 +75,7 @@ class Library:
         if updates is None:
             return books  # If not updates are passed, presumably deletion is happening
 
-        previews = []
-        for book in books:
-            preview_book = book.copy(**updates)
-            preview_book.validate()
-            previews.append(preview_book)
+        previews = [book.copy(**updates) for book in books]
         return previews
 
     def delete(self, **identifiers: Any) -> None:
