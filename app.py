@@ -7,13 +7,10 @@ from datetime import date
 from tabulate import tabulate
 import shlex
 
-repository = SQLRepository()
-library = Library(repository)  
-def to_date(string:str)->date:
-    return date.fromisoformat(string)
-def add(data:Dict):
-    data.pop('action', None)
-    print("added book entry as :",library.add(data))
+
+def add(data: Dict):
+    data.pop("action", None)
+    print("added book entry as :", library.add(data))
     return
 
 def edit(data: Dict):
@@ -178,4 +175,6 @@ def main():
 
 
 if __name__ == "__main__":
-	main()
+    repository = SQLRepository()
+    library = Library(repository)
+    main()
