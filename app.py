@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import argparse
 import loadscreen
 import shlex
