@@ -89,14 +89,16 @@ def include_common_args(parser: argparse.ArgumentParser):
 
 
 def add_setter_args(parser: argparse.ArgumentParser):
-    parser.add_argument("--set-author", type=str, help="new author name")
-    parser.add_argument("--set-title", type=str, help="new book title")
-    parser.add_argument("--set-format", type=str, help="new format")
-    parser.add_argument("--set-isbn", type=str, help="new ISBN")
-    parser.add_argument("--set-pages", type=int, help="new page count")
-    parser.add_argument("--set-runtime", type=int, help="new runtime")
-    parser.add_argument("--set-start-date", type=to_date, help="new start date")
-    parser.add_argument("--set-finish-date", type=to_date, help="new finish date")
+    parser.add_argument("-sa", "--set-author", type=str, help="new author name")
+    parser.add_argument("-st", "--set-title", type=str, help="new book title")
+    parser.add_argument("-sf", "--set-format", type=str, help="new format")
+    parser.add_argument("-si", "--set-isbn", type=str, help="new ISBN")
+    parser.add_argument("-sp", "--set-pages", type=int, help="new page count")
+    parser.add_argument("-sr", "--set-runtime", type=int, help="new runtime")
+    parser.add_argument("-ssd", "--set-start-date", type=to_date, help="new start date")
+    parser.add_argument(
+        "-sfd", "--set-finish-date", type=to_date, help="new finish date"
+    )
 
 
 def cli_parser() -> argparse.ArgumentParser:
