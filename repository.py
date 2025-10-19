@@ -42,6 +42,7 @@ class Repository(ABC):
 class SQLRepository(Repository):
     def __init__(self, db_path="books.db"):
         self.conn = sqlite3.connect(db_path)  # creates or connects with the file
+        
         self.conn.row_factory = sqlite3.Row
         self.cursor = self.conn.cursor()
         self.cursor.execute(
@@ -55,7 +56,8 @@ class SQLRepository(Repository):
 				pages INTEGER,
 				runtime INTEGER,
 				start_date TEXT,
-				finish_date TEXT
+				finish_date TEXT,
+				UNIQUE(title,author,format)
 			);
 		"""
         )  # we are actually createing the table if it doesnot exist and thereason why datatypes are different here than the models  is because models are purely pythonic and this is for SQL initilization.

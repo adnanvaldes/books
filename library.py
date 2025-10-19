@@ -37,6 +37,8 @@ class Library:
         self.repository = repository
 
     def add(self, data: Dict[str, Any]) -> Book:
+        if self.repository.list(**data):
+            raise ValueError
         book = Book.from_dict({**data, "id": None})
         return self.repository.save(book)
 
@@ -59,7 +61,7 @@ class Library:
             return book
         book.finish()
 
-        self.repository.save(book)
+        self.repository.update(book)
         return book
 
     def list_(self, **identifiers) -> List[Book]:

@@ -9,6 +9,8 @@ import shlex
 
 repository = SQLRepository()
 library = Library(repository)  
+def to_date(string:str)->date:
+    return date.fromisoformat(string)
 def add(data:Dict):
     data.pop('action', None)
     print("added book entry as :",library.add(data))
@@ -41,8 +43,12 @@ def delete(data:dict):
     data={key:value for key,value in data.items() if value is not None}
     library.delete(**data)
     return
-def finish():
-	return
+def finish(data:dict):
+    data.pop('action',None)
+    data={key:value for key,value in data.items() if value is not None}
+    library.finish(**data)
+    return
+
 def import_():
 	print("import function will be here ")
 	return
@@ -78,8 +84,8 @@ def main():
 	edit_parser.add_argument('-i', '--isbn', type=str, help='ISBN to search for')
 	edit_parser.add_argument('-p', '--pages', type=int, help="number of pages to search for")
 	edit_parser.add_argument('-r', '--runtime', type=int, help="runtime to search for (audiobooks)")
-	edit_parser.add_argument('-sd', '--start_date', type=date, help="start date to search for")
-	edit_parser.add_argument('-fd', '--finish_date', type=date, help="finish date to search for")
+	edit_parser.add_argument('-sd', '--start_date', type=to_date, help="start date to search for")
+	edit_parser.add_argument('-fd', '--finish_date', type=to_date, help="finish date to search for")
 
 	# Set arguments (new values to update)
 	edit_parser.add_argument('--set-author', type=str, help='new author name')
@@ -88,8 +94,8 @@ def main():
 	edit_parser.add_argument('--set-isbn', type=str, help='new ISBN')
 	edit_parser.add_argument('--set-pages', type=int, help="new number of pages")
 	edit_parser.add_argument('--set-runtime', type=int, help="new runtime (audiobooks)")
-	edit_parser.add_argument('--set-start-date', type=date, help="new start date")
-	edit_parser.add_argument('--set-finish-date', type=date, help="new finish date")
+	edit_parser.add_argument('--set-start-date', type=to_date, help="new start date")
+	edit_parser.add_argument('--set-finish-date', type=to_date, help="new finish date")
 
  	# LIST subcommand
 	list_parser = subparsers.add_parser('list', help='List books')
@@ -100,8 +106,8 @@ def main():
 	list_parser.add_argument('-i','--isbn',type=str,help='Code to help define genre')
 	list_parser.add_argument('-p','--pages',type=int,help="number of pages")
 	list_parser.add_argument('-r','--runtime',type=int,help="total runtime in case of audiobooks")
-	list_parser.add_argument('-sd','--start_date',type =date,help="date when the user started the book")
-	list_parser.add_argument('-fd','--finish_date',type=date,help="date the user finished the book ")
+	list_parser.add_argument('-sd','--start_date',type =to_date,help="date when the user started the book")
+	list_parser.add_argument('-fd','--finish_date',type=to_date,help="date the user finished the book ")
  
     # ADD subcommand
 	add_parser = subparsers.add_parser('add', help='Add a book')
@@ -111,8 +117,8 @@ def main():
 	add_parser.add_argument('-i','--isbn',type=str,help='Code to help define genre')
 	add_parser.add_argument('-p','--pages',type=int,help="number of pages")
 	add_parser.add_argument('-r','--runtime',type=int,help="total runtime in case of audiobooks")
-	add_parser.add_argument('-sd','--start_date',type =date,help="date when the user started the book")
-	add_parser.add_argument('-fd','--finish_date',type=date,help="date the user finished the book ")
+	add_parser.add_argument('-sd','--start_date',type =to_date,help="date when the user started the book")
+	add_parser.add_argument('-fd','--finish_date',type=to_date,help="date the user finished the book ")
 	
     
     # DELETE subcommand
@@ -123,11 +129,19 @@ def main():
 	delete_parser.add_argument('-i','--isbn',type=str,help='Code to help define genre')
 	delete_parser.add_argument('-p','--pages',type=int,help="number of pages")
 	delete_parser.add_argument('-r','--runtime',type=int,help="total runtime in case of audiobooks")
-	delete_parser.add_argument('-sd','--start_date',type =date,help="date when the user started the book")
-	delete_parser.add_argument('-fd','--finish_date',type=date,help="date the user finished the book ")
+	delete_parser.add_argument('-sd','--start_date',type =to_date,help="date when the user started the book")
+	delete_parser.add_argument('-fd','--finish_date',type=to_date,help="date the user finished the book ")
 	
     # FINISH subcommand
 	finish_parser = subparsers.add_parser('finish', help='Mark book as finished')
+	finish_parser.add_argument('-a', '--author', type=str, help='name of author')
+	finish_parser.add_argument('-t','--title',type=str,help='name of book')
+	finish_parser.add_argument('-f','--format',type=str,help="eg: (pysical,e-book,audiobook)")
+	finish_parser.add_argument('-i','--isbn',type=str,help='Code to help define genre')
+	finish_parser.add_argument('-p','--pages',type=int,help="number of pages")
+	finish_parser.add_argument('-r','--runtime',type=int,help="total runtime in case of audiobooks")
+	finish_parser.add_argument('-sd','--start_date',type =to_date,help="date when the user started the book")
+	finish_parser.add_argument('-fd','--finish_date',type=to_date,help="date the user finished the book ")
 	while True:
 		try:
 			user_input=input("> ").strip()
