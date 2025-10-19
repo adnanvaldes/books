@@ -5,6 +5,8 @@ from typing import Dict
 from repository import SQLRepository
 from datetime import date
 from tabulate import tabulate
+import shlex
+
 repository = SQLRepository()
 library = Library(repository)  
 def add(data:Dict):
@@ -37,7 +39,6 @@ def delete(data:dict):
     library.delete(**data)
     return
 def finish():
-	print("finish function will be here ")
 	return
 def import_():
 	print("import function will be here ")
@@ -123,7 +124,7 @@ def main():
 				break
 			if not user_input:
 				continue
-			args = parser.parse_args(user_input.split()) 
+			args = parser.parse_args(shlex.split(user_input)) 
 			command={
 				"add":add,
 				"list":list_,
