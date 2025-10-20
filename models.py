@@ -78,9 +78,9 @@ class Book:
         (BOOK ) Dune [Frank Herbert]  YES   {s:2024-05-01, e:2024-05-28, 412p}
         """
         fmt = f"({self.format.value.upper()})"
-        title = f"{self.title[:16]:<16}"
-        author = f"[{self.author[:16]:<16}]"
-        finished = "Y" if self.is_finished() else "N"
+        title = f"{self.title}"
+        author = f"[{self.author}]"
+        finished = "Finished" if self.is_finished() else None
 
         details = []
         if self.start_date:
@@ -95,8 +95,8 @@ class Book:
             details.append(f"{hours}h{minutes:02d}")
 
         metadata = f"{{{', '.join(details)}}}" if details else ""
-        metadata = f"{metadata:<40}"
-        return f"{fmt} {title} {author} {finished} {metadata}"
+        metadata = f"{metadata}"
+        return f"{title} {author} ({finished}) {fmt} {metadata}"
 
     def __copy__(self):
         return self.copy()
