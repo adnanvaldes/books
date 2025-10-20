@@ -56,6 +56,36 @@ books delete -t "Dune"
 
 Books are stored in a local SQLite database (`books.db` by default).
 
+### Docker / Podman
+
+You can also use Docker or Podman to run the app, using the provided Dockerfile. The container image uses `python:3.13-slim` and nothing else, so building the image should be relatively quick:
+
+```bash
+# Clone the repository
+git clone https://github.com/adnanvaldes/books.git
+cd books
+
+# Build the image
+## With Podman
+podman build -t books-cli . # Or whatever name you want after `-t`
+## With Docker
+docker build -t books-cli .
+
+
+# Run the image
+## With Podman
+podman run -it books-cli    # The container must run in interactive mode for the app to work
+## With Docker
+docker run -it books-cli
+```
+Note that to persist the database, you have to mount the `/app` directory inside the container, else the `books.db` file will be as ephemeral as the container itself. Do to so, modify the `run` command as follows:
+
+```bash
+podman run -it -v </path/to/your/local/database>:/app books-cli
+```
+
+This will use a `bind mount` to map a specific directory to the container's `/app` directory. Note that you can also specify a specific `books.db` file as part of the bind mount, but neither Docker nor Podman will create the file (they will only create directories), so make sure it exists before running the container.
+
 ---
 
 ## Development
@@ -71,6 +101,9 @@ git clone https://github.com/adnanvaldes/books.git
 cd books
 uv run app.py
 ```
+
+Alternatively, use `podman` or `docker`, see [[#Docker / Podman]].
+
 Making modifications after that should be relatively straight-forward. The primary files are:
 - `app.py`: This is the UI layer. The file defines a few "actions" via aptly named functions, establishes a command-line parser with `argparse`, and enters a loop to actually run the commands. This is the Views of the Model-View-Controller framework.
 - `library.py`: Any command called from `app.py` leads here. This file is the logic and translation alyer between the UI and the database. All validation should happen here. In web-development terminology this is the Controller in the Model-View-Controller framework.
