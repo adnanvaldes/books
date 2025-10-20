@@ -102,7 +102,7 @@ cd books
 uv run app.py
 ```
 
-Alternatively, use `podman` or `docker`, see [[#Docker / Podman]].
+Alternatively, use `podman` or `docker`, see [Docker / Podman](https://github.com/adnanvaldes/books#docker--podman).
 
 Making modifications after that should be relatively straight-forward. The primary files are:
 - `app.py`: This is the UI layer. The file defines a few "actions" via aptly named functions, establishes a command-line parser with `argparse`, and enters a loop to actually run the commands. This is the Views of the Model-View-Controller framework.
